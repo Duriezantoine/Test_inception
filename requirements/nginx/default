@@ -1,0 +1,31 @@
+server {
+    listen 443 ssl;
+    
+    server_name aduriez.42.fr;
+    ssl_certificate /etc/nginx/requirements/nginx/ssl/nginx.crt;
+    ssl_certificate_key /etc/nginx/requirements/nginx/ssl/nginx.key;
+
+    # Add recommended SSL settings
+    ssl_protocols TLSv1.2 TLSv1.3;
+    ssl_prefer_server_ciphers on;
+
+    root /var/www/html;
+    index index.php index.html index.htm;
+
+    # Main location block to handle requests
+    location / {
+        try_files $uri $uri/ /index.php?$args;
+    }
+
+    # PHP handling for WordPress
+    location ~ \.php$ {
+        fastcgi_pass wp-php:9000;
+        fastcgi_param SCRIPT_FILENAME $document_root$fastcgi_script_name;
+        include fastcgi_params;
+    }
+
+    # Block access to hidden files (e.g., .htaccess)
+    location ~ /\.ht {
+        deny all;
+    }
+}

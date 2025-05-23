@@ -1,0 +1,47 @@
+services:
+  nginx:
+    build: 
+      context: requirements/nginx/.
+    container_name: nginx
+    ports:
+      - "443:443"
+    volumes:
+      - ./web:/var/www/html
+    networks:
+      - inception_network
+    depends_on:
+      - wordpress
+    restart: always
+
+  wordpress:
+    build: 
+      context: requirements/wordpress/.
+    container_name: wp-php
+    volumes:
+      - ./web:/var/www/html
+    env_file:
+      - .env
+    networks:
+      - inception_network
+    depends_on:
+      - mariadb
+    restart: always
+
+  mariadb:
+    image: mariadb:latest
+    container_name: mariadb
+    volumes:
+      - ./db_data:/var/lib/mysql
+    env_file:
+      - .env
+    networks:
+      - inception_network
+    restart: always
+    command: --default-authentication-plugin=mysql_native_password
+
+networks:
+  inception_network:
+    driver: bridge
+
+# volumes:
+#   ./db_data:
